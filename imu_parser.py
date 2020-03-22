@@ -1,5 +1,6 @@
 import sys
 import re
+from imu_data import IMUData
 from decimal import Decimal
 
 
@@ -10,6 +11,7 @@ class IMUFileParser():
         accel_vals = []
         gyro_vals = []
         mag_vals = []
+        data_list = []
         with open(rawFile) as fp:
             line = fp.readline()
             accel_pattern = 'accelerometers'
@@ -33,14 +35,16 @@ class IMUFileParser():
             assert(len(accel_vals) == len(gyro_vals))
             assert(len(gyro_vals) == len(mag_vals))
             assert(len(mag_vals) == len(timestamp_vals))
-        return accel_vals, gyro_vals, mag_vals, timestamp_vals
+        for idx, val in enumerate(accel_vals):
+            data_list.append(IMUData(timestamp_vals[idx], 
+                            accel_vals[idx][0], accel_vals[idx][1], accel_vals[idx][2],
+                            gyro_vals[idx][0], gyro_vals[idx][1], gyro_vals[idx][2],
+                            mag_vals[idx][0], mag_vals[idx][1], mag_vals[idx][2]))
+        return data_list
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise NameError("Please supply an input imu.txt file to read from!")
         exit()
-    accel_vals, gyro_vals, mag_vals, ts_vals = IMUFileParser.parseRawFile(sys.argv[1])
-    print(accel_vals[-1])
-    print(gyro_vals[-1])
-    print(mag_vals[-1])
-    print(ts_vals[-1])
+    data_list = IMUFileParser.parseRawFile(sys.argv[1])
+    print(data_list[-1])
